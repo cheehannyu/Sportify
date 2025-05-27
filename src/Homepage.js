@@ -25,6 +25,6 @@ function Homepage({ username, onLogout }) { // Accept username and onLogout as p
     </div>
   );
 }
-
+// comment
 export default Homepage;
 
