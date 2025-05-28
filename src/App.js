@@ -1,44 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+
+// Firebase auth
+import { auth } from './firebase'; 
+import { onAuthStateChanged, signOut } from "firebase/auth";
+
+// Components
 import Login from './Login';
-import Homepage from './Homepage'; // Import the Homepage component
+import SignUp from './SignUp';
+import Verification from './Verification';
+import Homepage from './Homepage';
+
+// Constants for view states to manage navigation
+const VIEWS = {
+  LOGIN: 'login',
+  SIGNUP: 'signup',
+};
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(''); // To store the username
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentView, setCurrentView] = useState(VIEWS.LOGIN);
 
-  // This function will be called by the Login component on successful login
-  const handleLoginSuccess = (username) => {
-    setIsLoggedIn(true);
-    setCurrentUser(username);
-    // store token from localStorage
-  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(null);
+        setCurrentView(VIEWS.LOGIN);
+      }
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setCurrentUser('');
-    // clear token from localStorage
+    signOut(auth).catch((error) => {
+      console.error("Sign out error", error);
+    });
   };
 
-  
+  const navigateTo = (view) => {
+    setCurrentView(view);
+  };
+
   useEffect(() => {
-    document.body.style.backgroundColor = '#ffd67f'; 
-    // Cleanup function to remove style when component unmounts 
+    document.body.style.backgroundColor = '#ffd67f';
     return () => {
       document.body.style.backgroundColor = null;
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="App-container">
+        <p>Loading application...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="App">
-      {isLoggedIn ? (
-        <Homepage username={currentUser} onLogout={handleLogout} />
+    <div className="App-container">
+      {currentUser ? (
+        currentUser.emailVerified ? (
+          <Homepage
+            username={currentUser.displayName || currentUser.email}
+            onLogout={handleLogout}
+          />
+        ) : (
+          <Verification user={currentUser} />
+        )
       ) : (
-        <Login onLoginSuccess={handleLoginSuccess} />
+        currentView === VIEWS.SIGNUP ? (
+          <SignUp onNavigate={navigateTo} />
+        ) : (
+          <Login onNavigate={navigateTo} />
+        )
       )}
     </div>
   );
 }
 
 export default App;
-
