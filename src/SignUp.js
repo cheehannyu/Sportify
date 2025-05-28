@@ -23,9 +23,16 @@ function SignUp({ onNavigate }) {
       setError('Please enter both email and password.');
       return;
     }
+
     if (password.length < 8) {
       setError('Password should be at least 8 characters long.');
       return;
+    }
+
+    Ensure user is from NUS
+    if (!email.endsWith("@u.nus.edu")) {
+        setError('Please use your NUS email.');
+        return;
     }
 
     try {
