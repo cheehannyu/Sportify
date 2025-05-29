@@ -3,6 +3,7 @@ import './SignUp.css';
 import { auth } from './firebase'; // Firebase auth 
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth"; 
 
+
 // Input onNavigate prop to switch back to Login view
 function SignUp({ onNavigate }) {
   // State for email, password, and display name inputs
@@ -29,11 +30,11 @@ function SignUp({ onNavigate }) {
       return;
     }
 
-    Ensure user is from NUS
-    if (!email.endsWith("@u.nus.edu")) {
-        setError('Please use your NUS email.');
-        return;
-    }
+    //Ensure user is from NUS
+    //if (!email.endsWith("@u.nus.edu")) {
+       // setError('Please use your NUS email.');
+       // return;
+   // }
 
     try {
       // Create a new user with email and password using Firebase
@@ -72,9 +73,14 @@ function SignUp({ onNavigate }) {
   };
 
   return (
+  <div className="signup-page">
     <div className="signup-container"> 
       <form onSubmit={handleSubmit} className="signup-form">
-        <h2>Sign Up</h2>
+        <h2>
+          <span className="sport-text">SPORT</span>
+          <span className="ify-text">IFY</span>
+        </h2>
+        <p className="signup-subtitle">Create your account</p>
         {error && <p className="error-message">{error}</p>}
         {message && <p className="success-message">{message}</p>}
         <div className="form-group">
@@ -84,6 +90,7 @@ function SignUp({ onNavigate }) {
             id="displayName"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="Enter your display name"
           />
         </div>
         <div className="form-group">
@@ -93,6 +100,7 @@ function SignUp({ onNavigate }) {
             id="signup-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your NUS email"
             required
           />
         </div>
@@ -103,19 +111,22 @@ function SignUp({ onNavigate }) {
             id="signup-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
             required
           />
         </div>
         <button type="submit" className="signup-button">Sign Up</button>
-        <p className="navigation-link">
-          Already have an account?{' '}
+        <div className="navigation-link">
+          <span>Already have an account?</span>
           <button type="button" onClick={() => onNavigate('login')} className="link-button">
             Login
           </button>
-        </p>
+        </div>
       </form>
     </div>
-  );
+  </div>
+);
+
 }
 export default SignUp;
 

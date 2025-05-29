@@ -13,7 +13,7 @@ function Verification({ user }) {
     if (user) {
       try {
         await sendEmailVerification(user);
-        setMessage('Verification email resent. Please check your inbox (and spam folder).');
+        setMessage('Verification email has been resent. Please check your inbox (Do check your spam folder also.)');
       } catch (err) {
         setError('Failed to resend verification email. Please try again later.');
         console.error("Resend verification error:", err);
@@ -32,9 +32,9 @@ function Verification({ user }) {
       try {
         await auth.currentUser.reload();
         if (auth.currentUser.emailVerified) {
-          setMessage("Email verified successfully! You should be redirected shortly or can now access the homepage.");
+          setMessage("Your email has been verified successfully! You may proceed to login now.");
         } else {
-          setError("Email not yet verified. Please check your email and click the verification link.");
+          setError("Your email has not been verified yet. Please check your email and click on the verification link sent.");
         }
       } catch (err) {
         setError("Failed to check verification status. Please try again.");
@@ -44,7 +44,12 @@ function Verification({ user }) {
   };
 
   return (
-    <div className="verification-container">
+      <div className="verification-page">
+      <div className="verification-container">
+      <h2>
+        <span className="sport-text">SPORT</span>
+        <span className="ify-text">IFY</span>
+      </h2>
       <h2>Verify Your Email</h2>
       {error && <p className="error-message">{error}</p>}
       {message && <p className="success-message">{message}</p>}
@@ -52,8 +57,8 @@ function Verification({ user }) {
         A verification email has been sent to <strong>{user?.email}</strong>.
       </p>
       <p>
-        Please click the link in the email to complete your registration.
-        If you don't see it, please check your spam folder.
+        Please click the link sent to your email to complete registration.
+        If you don't see it in your inbox, please check your spam folder.
       </p>
       <button onClick={handleResendVerification} className="action-button">
         Resend Verification Email
@@ -64,6 +69,7 @@ function Verification({ user }) {
       <button onClick={handleGoToLogin} className="link-button back-to-login-button">
         Back to Login
       </button>
+    </div>
     </div>
   );
 }

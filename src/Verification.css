@@ -1,79 +1,291 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Main container - full viewport with background */
+.verification-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a1a 0%, #000300ee 50%, #090000 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+}
+
+/* Background overlay for extra depth */
+.verification-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(76, 175, 80, 0.1) 0%, transparent 50%);
+  z-index: 1;
+}
+
 .verification-container {
   width: 100%;
-  max-width: 550px; 
-  padding: 30px 40px; 
-  border: 1px solid #00bf63; 
-  border-radius: 8px;
-  background-color: #ffffff; 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  text-align: center; 
+  max-width: 45%;
+  min-width: 500px;
+  padding: 3rem 3.5rem;
+  background: rgba(22, 78, 20, 0.855);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .verification-container h2 {
-  color: #333;
-  margin-bottom: 20px;
-  font-size: 1.8em;
+  color: #f5f3f3;
+  margin-bottom: 1rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.verification-subtitle {
+  color: #a0a0a0;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  text-align: center;
 }
 
 .verification-container p {
-  margin-bottom: 15px;
-  line-height: 1.7; 
-  color: #555;
-  font-size: 1.05em;
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  text-align: center;
+  max-width: 90%;
 }
 
 .verification-container strong {
-  color: black; 
+  color: #e95910;
+  font-weight: 600;
 }
 
 .action-button {
-  width: 100%; 
-  max-width: 300px; 
-  margin: 10px auto; 
-  padding: 12px 15px;
-  background-color: black; 
-  color: #ffd67f; 
+  width: 100%;
+  max-width: 350px;
+  margin: 1rem auto;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #c46e2c 0%, #c17906 100%);
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 1.05em;
-  font-weight: bold;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
 .action-button:hover {
-  background-color: #333;
-  color: #ffffff;
+  background: linear-gradient(135deg, #000000 0%, #000b01 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.action-button:hover::before {
+  left: 100%;
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
+.action-button:disabled {
+  background: linear-gradient(135deg, #666 0%, #444 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .error-message {
-  color: #dc3545;
-  margin: 15px 0; 
-  font-size: 0.9em;
-  font-weight: bold;
+  background: rgba(125, 6, 6, 0.945);
+  border: 1px solid rgba(22, 21, 21, 0.761);
+  color: #d90808;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-style: bold;
+  
+  text-align: center;
+  backdrop-filter: blur(10px);
+  max-width: 90%;
 }
 
 .success-message {
-  color: #00bf63; 
-  margin: 15px 0;
-  font-size: 0.9em;
-  font-weight: bold;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  max-width: 90%;
 }
 
 .back-to-login-button {
-  margin-top: 25px;
+  margin-top: 2rem;
   background: none;
   border: none;
-  color: #00bf63; 
+  color: #d9dac9;
   cursor: pointer;
   text-decoration: underline;
-  font-size: 0.95em;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
 }
 
 .back-to-login-button:hover {
-  color: #008c47; 
+  color: #66bb6a;
+  text-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Email verification status indicator */
+.verification-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.verification-status .icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.verification-status.pending .icon {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.verification-status.verified .icon {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .verification-container {
+    max-width: 55%;
+  }
+}
+
+@media (max-width: 992px) {
+  .verification-container {
+    max-width: 70%;
+    min-width: 450px;
+  }
+}
+
+@media (max-width: 768px) {
+  .verification-container {
+    max-width: 90%;
+    min-width: 320px;
+    padding: 2.5rem 2rem;
+  }
+  
+  .verification-container h2 {
+    font-size: 1.8rem;
+  }
+  
+  .verification-container p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .verification-container {
+    max-width: 95%;
+    padding: 2rem 1.5rem;
+  }
+  
+  .verification-container h2 {
+    font-size: 1.6rem;
+  }
+  
+  .action-button {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optional: Loading spinner for resend button */
+.action-button.loading::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

@@ -34,38 +34,70 @@ function Login({ onNavigate }) {
   };
 
   return (
-    <div className="login-container"> 
-      <form onSubmit={handleSubmit} className="login-form">
-        <h2>Login</h2>
-        {error && <p className="error-message">{error}</p>}
-        <div className="form-group">
-          <label htmlFor="login-email">Email:</label>
-          <input
-            type="email"
-            id="login-email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="login-page">
+    
+      <div className="login-image-section">
+        <img 
+          src="/SPORTIFY.png" 
+          alt="Sportify Logo" 
+          className="login-brand-image"
+        />
+      </div>
+
+     
+      <div className="login-container">
+        <div className="login-form-wrapper">
+          <form onSubmit={handleSubmit} className="login-form">
+            <h2>
+  <span className="sport-text">SPORT</span>
+  <span className="ify-text">IFY</span>
+</h2>
+
+            <p className="login-subtitle">Start playing!</p>
+            
+            {error && <p className="error-message">{error}</p>}
+            
+            <div className="form-group">
+              <label htmlFor="login-email">Email</label>
+              <input
+                type="email"
+                id="login-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="login-password">Password</label>
+              <input
+                type="password"
+                id="login-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+            
+            <button type="submit" className="login-button">
+              Sign In
+            </button>
+            
+            <div className="navigation-link">
+              <span>Don't have an account?</span>
+              <button 
+                type="button" 
+                onClick={() => onNavigate('signup')} 
+                className="link-button"
+              >
+                Sign Up
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="form-group">
-          <label htmlFor="login-password">Password:</label>
-          <input
-            type="password"
-            id="login-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="login-button">Login</button>
-        <p className="navigation-link">
-          Don't have an account?{' '}
-          <button type="button" onClick={() => onNavigate('signup')} className="link-button">
-            Sign Up
-          </button>
-        </p>
-      </form>
+      </div>
     </div>
   );
 }
