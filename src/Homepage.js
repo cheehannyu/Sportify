@@ -170,7 +170,7 @@ function Homepage({ username, onLogout }) {
           </div>
         </section>
 
-        {/* Quick Stats */}
+        {}
         <section className="stats-section">
           <div className="stats-grid">
             <div className="stat-card">
