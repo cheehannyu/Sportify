@@ -9,6 +9,14 @@ import Login from './Login';
 import SignUp from './SignUp';
 import Verification from './Verification';
 import Homepage from './Homepage';
+import { Routes, Route } from 'react-router-dom';
+import Football from './Football';
+import TableTennis from './TableTennis';
+import Tennis from './Tennis';
+import Badminton from './Badminton';
+import Basketball from './Basketball';
+import Squash from './Squash';
+import Boxing from './Boxing';
 
 // Constants for view states to manage navigation
 const VIEWS = {
@@ -61,22 +69,33 @@ function App() {
 
   return (
     <div className="App-container">
-      {currentUser ? (
-        currentUser.emailVerified ? (
-          <Homepage
-            username={currentUser.displayName || currentUser.email}
-            onLogout={handleLogout}
-          />
-        ) : (
-          <Verification user={currentUser} />
-        )
-      ) : (
-        currentView === VIEWS.SIGNUP ? (
-          <SignUp onNavigate={navigateTo} />
-        ) : (
-          <Login onNavigate={navigateTo} />
-        )
-      )}
+      <Routes>
+        <Route path="/" element={
+          currentUser ? (
+            currentUser.emailVerified ? (
+              <Homepage
+                username={currentUser.displayName || currentUser.email}
+                onLogout={handleLogout}
+              />
+            ) : (
+              <Verification user={currentUser} />
+            )
+          ) : (
+            currentView === VIEWS.SIGNUP ? (
+              <SignUp onNavigate={navigateTo} />
+            ) : (
+              <Login onNavigate={navigateTo} />
+            )
+          )
+        } />
+        <Route path="/tennis" element={<Tennis />} />
+        <Route path="/football" element={<Football />} />
+        <Route path="/tabletennis" element={<TableTennis />} />
+        <Route path="/badminton" element={<Badminton />} />
+        <Route path="/basketball" element={<Basketball />} />
+        <Route path="/squash" element={<Squash />} />
+        <Route path="/boxing" element={<Boxing />} />
+      </Routes>
     </div>
   );
 }
