@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import './Homepage.css'; 
 
 function Homepage({ username, onLogout }) {
@@ -208,6 +209,125 @@ function Homepage({ username, onLogout }) {
           >
             ×
           </button>
+=======
+import './Homepage.css';
+import { useNavigate } from 'react-router-dom';
+
+function Homepage({ username, onLogout }) {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const sports = [
+    { id: 1, name: 'Football', icon: '/Messi.png', athlete: 'Messi', description: 'Tiki taka magic', color: '#2196F3', quote: "It took me 17 years and 114 days to become an overnight success." },
+    { id: 2, name: 'Table Tennis', icon: '/TT.png', athlete: 'Ma Long', description: 'Ping pong perfection', quote: "Focus on the present point, not the last one or the next one.", color: '#FF9800' },
+    { id: 3, name: 'Tennis', icon: '/Serena.png', athlete: 'Serena Williams', description: 'Game.Set.Match', quote: "I really think a champion is defined not by their wins but by how they can recover when they fall.", color: '#E91E63' },
+    { id: 4, name: 'Badminton', icon: '/LeeCW.png', athlete: 'Lee Chong Wei', description: 'Smash it up', quote: "Even if you're not winning, you can still be successful. Success is about giving your best effort.", color: '#9C27B0' },
+    { id: 5, name: 'Basketball', icon: '/Lebron.png', athlete: 'LeBron James', description: 'King of the court', quote: 'I have failed over and over and over again in my life, and that is why I succeed.', color: '#FF5722' },
+    { id: 6, name: 'Squash', icon: '/Squash.png', athlete: 'Ramy Ashour', description: 'Racquet precision', quote: 'You need both physical and mental strength to dominate.', color: '#607D8B' },
+    { id: 7, name: 'Boxing', icon: '/Tyson.png', athlete: 'Mike Tyson', description: 'Knockout king', quote: "Everyone has a plan until they get punched in the mouth.", color: '#795548' }
+  ];
+
+  // Placeholder for user history (expand as needed)
+  const userHistory = [];
+
+  const navigate = useNavigate();
+
+  const handleSportClick = (sport) => {
+    const routeMap = {
+      'Football': '/football',
+      'Table Tennis': '/tabletennis',
+      'Tennis': '/tennis',
+      'Badminton': '/badminton',
+      'Basketball': '/basketball',
+      'Squash': '/squash',
+      'Boxing': '/boxing'
+    };
+    navigate(routeMap[sport.name]);
+  };
+
+  return (
+    <div className="homepage-container">
+      {/* User Menu and History Sidebar */}
+      <div className="sidebar">
+        <button className="history-button" onClick={() => setShowHistory(!showHistory)}>
+          History
+        </button>
+        {showHistory && (
+          <div className="history-list">
+            <h3>Your Match History</h3>
+            {userHistory.length === 0 ? (
+              <p>No matches yet.</p>
+            ) : (
+              <ul>
+                {userHistory.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+
+      <header className="homepage-header">
+        <div className="user-info">
+          <span style={{ fontWeight: 'bold', fontSize: '1.2em' }}>Welcome, {username}!</span>
+          <button
+            className="user-menu-toggle"
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            style={{ marginLeft: 16 }}
+          >
+            ☰
+          </button>
+          {showUserMenu && (
+            <div className="user-menu-dropdown">
+              <button onClick={onLogout} className="logout-button">Logout</button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      <div className="homepage-content">
+        <h2 style={{ color: '#00bf63', marginBottom: 0 }}>Choose Your Sport</h2>
+        <p style={{ marginTop: 0 }}>Select a sport to get matched!</p>
+        <div className="sports-list" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '32px', marginTop: '32px' }}>
+          {sports.map(sport => (
+            <div
+              key={sport.id}
+              className="feature-box"
+              style={{
+                borderColor: sport.color,
+                cursor: 'pointer',
+                width: 220,
+                alignItems: 'center',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+              onClick={() => handleSportClick(sport)}
+            >
+              <img src={sport.icon} alt={sport.name} style={{ width: 100, height: 100, borderRadius: '50%', margin: '16px 0' }} />
+              <h3 style={{ color: sport.color, margin: '8px 0 0 0' }}>{sport.name}</h3>
+              <p style={{ margin: '4px 0', color: '#fff', fontSize: '1em' }}>{sport.description}</p>
+              <p style={{ margin: '4px 0', color: '#fff', fontWeight: 'bold' }}>{sport.athlete}</p>
+              <p style={{ margin: '4px 0', color: '#fff', fontStyle: 'italic', fontSize: '0.95em' }}>"{sport.quote}"</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats Section */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginTop: '40px' }}>
+          <div className="feature-box" style={{ width: 160 }}>
+            <h3 style={{ color: '#00bf63' }}>0</h3>
+            <p>Sports Conquered</p>
+          </div>
+          <div className="feature-box" style={{ width: 160 }}>
+            <h3 style={{ color: '#00bf63' }}>0</h3>
+            <p>Hours Played</p>
+          </div>
+          <div className="feature-box" style={{ width: 160 }}>
+            <h3 style={{ color: '#00bf63' }}>0</h3>
+            <p>Reviews</p>
+          </div>
+>>>>>>> 419f1c4 (Incorporated React Router logic, in conjuction with App.js and separate components)
         </div>
         <div className="history-content">
           {userHistory.map((item, index) => (
