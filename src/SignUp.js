@@ -30,12 +30,6 @@ function SignUp({ onNavigate }) {
       return;
     }
 
-    //Ensure user is from NUS
-    //if (!email.endsWith("@u.nus.edu")) {
-       // setError('Please use your NUS email.');
-       // return;
-   // }
-
     try {
       // Create a new user with email and password using Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
