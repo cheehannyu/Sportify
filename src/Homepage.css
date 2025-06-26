@@ -1,5 +1,5 @@
 body {
-  background: #ffd67f;
+  background: #fff;
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 .homepage-container {
@@ -36,7 +36,7 @@ body {
 .logout-button {
   padding: 10px 20px;
   background-color: black;
-  color: #ffd67f;
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -114,7 +114,7 @@ body {
   margin: 2px 0;
 }
 .feature-box strong {
-  color: #ffd67f;
+  color: #fff;
   font-weight: 700;
 }
 .feature-box em {

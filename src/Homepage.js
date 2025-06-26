@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Homepage1.css';
+import './Homepage.css';
 import { useNavigate } from 'react-router-dom';
 
 function Homepage({ username, onLogout }) {
@@ -12,10 +12,7 @@ function Homepage({ username, onLogout }) {
     reviews: 0
   };
 
-  const userHistory = [
-    { sport: 'Tennis', date: '2025-06-10', result: 'Won' },
-    { sport: 'Football', date: '2025-06-12', result: 'Lost' }
-  ];
+  const userHistory = [];
 
   const sports = [
     { id: 1, name: 'Football', icon: '/Messi.png', athlete: 'Messi', description: 'Tiki taka magic', color: '#2196F3', quote: "It took me 17 years and 114 days to become an overnight success." },
@@ -42,6 +39,8 @@ function Homepage({ username, onLogout }) {
     navigate(routeMap[sport.name]);
   };
 
+  const handleMenuClick = () => {};
+
   const statFeatures = [
     { label: "Sports Conquered", value: stats.conquered, emoji: "🏆" },
     { label: "Hours Played", value: stats.hours, emoji: "⏳" },
@@ -51,18 +50,20 @@ function Homepage({ username, onLogout }) {
   return (
     <div className="homepage-container">
       <header className="homepage-header">
-        <span className="welcome-text">Welcome, {username}!</span>
+        <span className="welcome-text">Welcome, { username }!</span>
         <button
           className="user-menu-toggle"
-          onClick={() => setShowUserMenu(!showUserMenu)}
+          aria-label='Menu'
+          onClick={() => handleMenuClick}
         >
           ☰
         </button>
-        {showUserMenu && (
-          <div className="user-menu-dropdown">
-            <button onClick={onLogout} className="logout-button">Logout</button>
-          </div>
-        )}
+        <button
+          className="logout-button"
+          onClick={onLogout}
+        >
+          Logout
+        </button>
       </header>
 
       <main className="homepage-content">
