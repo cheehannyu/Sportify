@@ -20,7 +20,10 @@ import Basketball from './Basketball';
 import Squash from './Squash';
 import Boxing from './Boxing';
 
-const VIEWS = { LOGIN: 'login', SIGNUP: 'signup', VERIFICATION: 'verification' };
+const VIEWS = {
+  LOGIN: 'login',
+  SIGNUP: 'signup',
+};
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -46,43 +49,45 @@ function App() {
     });
   };
 
+  const navigateTo = (view) => {
+    setCurrentView(view);
+  };
+
   if (isLoading) {
     return (<div>Loading application...</div>);
   }
 
-  if (!currentUser) {
-    switch (currentView) {
-      case VIEWS.LOGIN:
-        return <Login onSwitchToSignUp={() => setCurrentView(VIEWS.SIGNUP)} />;
-      case VIEWS.SIGNUP:
-        return <SignUp
-          onSwitchToLogin={() => setCurrentView(VIEWS.LOGIN)}
-          onSwitchToVerification={() => setCurrentView(VIEWS.VERIFICATION)}
-        />;
-      case VIEWS.VERIFICATION:
-        return <Verification onSwitchToLogin={() => setCurrentView(VIEWS.LOGIN)} />;
-      default:
-        return <Login onSwitchToSignUp={() => setCurrentView(VIEWS.SIGNUP)} />;
-    }
-  }
-
   // User is logged in, use routing for other components
-  return (
-    <Routes>
-      <Route path="/" element={
-        <Homepage
-          username={currentUser.displayName || "User"}
-          onLogout={handleLogout}
-        />
-      } />
-      <Route path="/tennis" element={<Tennis />} />
-      <Route path="/football" element={<Football />} />
-      <Route path="/tabletennis" element={<TableTennis />} />
-      <Route path="/badminton" element={<Badminton />} />
-      <Route path="/basketball" element={<Basketball />} />
-      <Route path="/squash" element={<Squash />} />
-      <Route path="/boxing" element={<Boxing />} />
-    </Routes>
+return (
+    <div className="App-container">
+      <Routes>
+        <Route path="/" element={
+          currentUser ? (
+            currentUser.emailVerified ? (
+              <Homepage
+                username={currentUser.displayName || currentUser.email}
+                onLogout={handleLogout}
+              />
+            ) : (
+              <Verification user={currentUser} />
+            )
+          ) : (
+            currentView === VIEWS.SIGNUP ? (
+              <SignUp onNavigate={navigateTo} />
+            ) : (
+              <Login onNavigate={navigateTo} />
+            )
+          )
+        } />
+        <Route path="/tennis" element={<Tennis />} />
+        <Route path="/football" element={<Football />} />
+        <Route path="/tabletennis" element={<TableTennis />} />
+        <Route path="/badminton" element={<Badminton />} />
+        <Route path="/basketball" element={<Basketball />} />
+        <Route path="/squash" element={<Squash />} />
+        <Route path="/boxing" element={<Boxing />} />
+      </Routes>
+    </div>
   );
 }
 

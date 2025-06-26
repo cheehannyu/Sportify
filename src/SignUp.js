@@ -15,46 +15,62 @@ function SignUp({ onNavigate }) {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (event) => {
-  event.preventDefault();
-  setError('');
-  setMessage('');
+    event.preventDefault(); // Prevent default form submission
+    setError(''); // Clear previous errors
+    setMessage(''); // Clear previous messages
 
-  // Basic validation
-  if (!displayName.trim()) {
-    setError('Please enter your display name.');
-    return;
-  }
-  if (!email || !password) {
-    setError('Please enter both email and password.');
-    return;
-  }
-  if (password.length < 8) {
-    setError('Password should be at least 8 characters long.');
-    return;
-  }
+    // Basic validation
+    if (!email || !password) {
+      setError('Please enter both email and password.');
+      return;
+    }
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    if (auth.currentUser) {
-      await updateProfile(auth.currentUser, { displayName: displayName.trim() });
-      await sendEmailVerification(auth.currentUser);
-      setMessage('Registration successful! A verification email has been sent. Please check your inbox and verify your email before logging in.');
-    } else {
-      setError("User created, but couldn't send verification email. Please try logging in.");
+    if (password.length < 8) {
+      setError('Password should be at least 8 characters long.');
+      return;
     }
-  } catch (err) {
-    if (err.code === 'auth/email-already-in-use') {
-      setError('This email address is already in use.');
-    } else if (err.code === 'auth/invalid-email') {
-      setError('Please enter a valid email address.');
-    } else if (err.code === 'auth/weak-password') {
-      setError('Password is too weak. Please choose a stronger password.');
-    } else {
-      setError('Failed to sign up. Please try again.');
+
+    //Ensure user is from NUS
+    //if (!email.endsWith("@u.nus.edu")) {
+       // setError('Please use your NUS email.');
+       // return;
+   // }
+
+    try {
+      // Create a new user with email and password using Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Update the user's profile with a display name, if present
+      if (displayName && auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          displayName: displayName
+        });
+      }
+
+      // Send email verification to the newly created user
+      if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+        setMessage('Registration successful! A verification email has been sent. Please check your inbox and verify your email before logging in.');
+        // After successful signup and email sending, onAuthStateChanged detects
+        // emailVerified will be false, rendering Verification
+      } else {
+        setError("User created, but couldn't send verification email. Please try logging in.");
+      }
+
+    } catch (err) {
+      // Handle Firebase authentication errors
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email address is already in use.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password is too weak. Please choose a stronger password.');
+      } else {
+        setError('Failed to sign up. Please try again.');
+      }
+      console.error("Firebase sign up error:", err);
     }
-    console.error("Firebase sign up error:", err);
-  }
-};
+  };
 
   return (
   <div className="signup-page">
@@ -68,14 +84,12 @@ function SignUp({ onNavigate }) {
         {error && <p className="error-message">{error}</p>}
         {message && <p className="success-message">{message}</p>}
         <div className="form-group">
-          <label htmlFor="displayName">Display Name :</label>
+          <label htmlFor="displayName">Display Name (Optional):</label>
           <input
             type="text"
             id="displayName"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            required
-            autoComplete='nickname'
             placeholder="Enter your display name"
           />
         </div>
@@ -86,7 +100,7 @@ function SignUp({ onNavigate }) {
             id="signup-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            placeholder="Enter your NUS email"
             required
           />
         </div>
@@ -115,4 +129,3 @@ function SignUp({ onNavigate }) {
 
 }
 export default SignUp;
-
