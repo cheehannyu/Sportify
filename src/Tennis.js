@@ -1,176 +1,281 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { auth, db } from './firebase';
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  updateDoc,
+  doc,
+  arrayUnion,
+  getDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import CreateGame from './CreateGame';
 import TelegramModal from './TelegramModal';
 import './Tennis.css';
 
 function Tennis() {
-  const [games, setGames] = useState([]); // Start with no games
+  const [games, setGames] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
-  const [userJoinedGame, setUserJoinedGame] = useState(null); // Track which game user joined
-  const [currentUserId] = useState('user123'); // Mock user ID - replace with actual auth
+  const [userGamesCount, setUserGamesCount] = useState(0);
 
-  const handleCreateGame = (newGame) => {
-    const gameId = Date.now(); // Use timestamp as unique ID
-    const createdGame = {
-      id: gameId,
+  // Filter state
+  const [locationFilters, setLocationFilters] = useState({
+    North: false,
+    South: false,
+    East: false,
+    West: false,
+    Central: false
+  });
+
+  const currentUserId = auth.currentUser?.uid || "user123";
+  const currentUserDisplayName = auth.currentUser?.displayName || "Unknown";
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "tennisGames"), (snapshot) => {
+      const fetchedGames = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setGames(fetchedGames);
+
+      const gamesUserIsIn = fetchedGames.filter(game =>
+        game.players.some(player => player.id === currentUserId)
+      );
+      setUserGamesCount(gamesUserIsIn.length);
+    });
+    return () => unsubscribe();
+  }, [currentUserId]);
+
+  // Filtering and always sorting by date (soonest first)
+  const processedGames = useMemo(() => {
+    let result = [...games];
+    const activeLocations = Object.entries(locationFilters)
+      .filter(([_, isActive]) => isActive)
+      .map(([location]) => location);
+    if (activeLocations.length > 0) {
+      result = result.filter(game => activeLocations.includes(game.location));
+    }
+    result.sort((a, b) => new Date(a.date) - new Date(b.date));
+    return result;
+  }, [games, locationFilters]);
+
+  const handleLocationFilterChange = (location) => {
+    setLocationFilters(prev => ({
+      ...prev,
+      [location]: !prev[location]
+    }));
+  };
+
+  const handleCreateGame = async (newGame) => {
+    if (userGamesCount >= 3) {
+      alert('Involved in too many games!');
+      return;
+    }
+    await addDoc(collection(db, "tennisGames"), {
       location: newGame.location,
       maxPlayers: newGame.maxPlayers,
       currentPlayers: 1,
       createdBy: currentUserId,
-      players: [{ id: currentUserId, telegramId: null }],
-      isCreator: true
-    };
-    
-    setGames([...games, createdGame]);
-    setUserJoinedGame(gameId);
+      createdByDisplayName: currentUserDisplayName,
+      date: newGame.date,
+      time: newGame.time, // "09:00", "13:00", etc.
+      players: [{
+        id: currentUserId,
+        telegramId: newGame.telegramId,
+        displayName: currentUserDisplayName
+      }],
+      isCreator: true,
+    });
     setShowCreateForm(false);
   };
 
-  const handleJoinGame = (gameId) => {
-    // Check if user already joined a game
-    if (userJoinedGame && userJoinedGame !== gameId) {
-      alert('You can only join one tennis match at a time!');
+  const handleJoinGame = async (gameId) => {
+    if (userGamesCount >= 3) {
+      alert('You can only be in a maximum of 3 tennis games at once.');
       return;
     }
-
-    setGames(games.map(game => {
-      if (game.id === gameId && game.currentPlayers < game.maxPlayers) {
-        const updatedGame = {
-          ...game,
+    const gameRef = doc(db, "tennisGames", gameId);
+    const gameSnap = await getDoc(gameRef);
+    if (gameSnap.exists()) {
+      const game = gameSnap.data();
+      if (game.createdBy === currentUserId) return;
+      if (game.players.some(player => player.id === currentUserId)) return;
+      if (game.currentPlayers < game.maxPlayers) {
+        await updateDoc(gameRef, {
           currentPlayers: game.currentPlayers + 1,
-          players: [...game.players, { id: currentUserId, telegramId: null }]
-        };
-        
-        // If game is now full, show telegram modal
-        if (updatedGame.currentPlayers === updatedGame.maxPlayers) {
-          setSelectedGameId(gameId);
-          setShowTelegramModal(true);
-        }
-        
-        return updatedGame;
+          players: arrayUnion({
+            id: currentUserId,
+            telegramId: null,
+            displayName: currentUserDisplayName
+          })
+        });
+        setSelectedGameId(gameId);
+        setShowTelegramModal(true);
       }
-      return game;
-    }));
-    
-    setUserJoinedGame(gameId);
+    }
   };
 
-  const handleTelegramSubmit = (telegramId) => {
-    setGames(games.map(game => {
-      if (game.id === selectedGameId) {
-        const updatedPlayers = game.players.map(player => 
-          player.id === currentUserId 
-            ? { ...player, telegramId }
-            : player
-        );
-        return { ...game, players: updatedPlayers };
-      }
-      return game;
-    }));
-    
+  const handleTelegramSubmit = async (telegramId) => {
+    if (!selectedGameId) return;
+    const gameRef = doc(db, "tennisGames", selectedGameId);
+    const gameSnap = await getDoc(gameRef);
+    if (gameSnap.exists()) {
+      const game = gameSnap.data();
+      const updatedPlayers = game.players.map(player =>
+        player.id === currentUserId ? { ...player, telegramId } : player
+      );
+      await updateDoc(gameRef, { players: updatedPlayers });
+    }
     setShowTelegramModal(false);
     setSelectedGameId(null);
   };
 
-  const handleLeaveGame = (gameId) => {
-    setGames(games.map(game => {
-      if (game.id === gameId) {
-        const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
-        return {
-          ...game,
-          currentPlayers: game.currentPlayers - 1,
-          players: updatedPlayers
-        };
-      }
-      return game;
-    }).filter(game => !(game.createdBy === currentUserId && game.players.length === 0)));
-    
-    setUserJoinedGame(null);
+  const handleTelegramCancel = async () => {
+  if (!selectedGameId) return;
+  const gameRef = doc(db, "tennisGames", selectedGameId);
+  const gameSnap = await getDoc(gameRef);
+  if (gameSnap.exists()) {
+    const game = gameSnap.data();
+    const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
+    await updateDoc(gameRef, {
+      currentPlayers: game.currentPlayers - 1,
+      players: updatedPlayers
+    });
+  }
+  setShowTelegramModal(false);
+  setSelectedGameId(null);
+};
+
+
+  const handleLeaveGame = async (gameId) => {
+    const gameRef = doc(db, "tennisGames", gameId);
+    const gameSnap = await getDoc(gameRef);
+    if (gameSnap.exists()) {
+      const game = gameSnap.data();
+      const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
+      await updateDoc(gameRef, {
+        currentPlayers: game.currentPlayers - 1,
+        players: updatedPlayers
+      });
+    }
+  };
+
+  const handleDeleteGame = async (gameId) => {
+    if (!window.confirm("Are you sure you want to delete this game?")) return;
+    await deleteDoc(doc(db, "tennisGames", gameId));
+  };
+
+  const handleConqueredGame = async (gameId) => {
+    if (!window.confirm("Are you sure you've conquered this game?")) return;
+    await deleteDoc(doc(db, "tennisGames", gameId));
   };
 
   const isGameCreator = (game) => game.createdBy === currentUserId;
   const isGameFull = (game) => game.currentPlayers === game.maxPlayers;
-  const allPlayersHaveTelegram = (game) => 
-    game.players.every(player => player.telegramId !== null);
+  const userInGame = (game) => game.players.some(player => player.id === currentUserId);
 
   return (
     <div className="tennis-container">
-      <h2>Tennis Match Finder</h2>
-      <p>Find or create tennis matches in your area</p>
-      
-      <button 
-        className="create-game-btn"
-        onClick={() => setShowCreateForm(true)}
-        disabled={userJoinedGame !== null}
-      >
-        {userJoinedGame ? 'Already in a match' : 'Create New Game'}
-      </button>
+      <h2>Find or create tennis matches in your area</h2>
 
+      {/* Centered Location Filter */}
+      <div className="location-filter-bar">
+        <label className="location-filter-label">Filter by Location:</label>
+        <div className="location-filter-options">
+          {Object.keys(locationFilters).map(location => (
+            <label key={location} className="location-checkbox-label">
+              <input
+                type="checkbox"
+                checked={locationFilters[location]}
+                onChange={() => handleLocationFilterChange(location)}
+              />
+              {location}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <p className="user-stats">You are currently in {userGamesCount}/3 tennis games</p>
+      <button 
+        className="create-game-btn" 
+        onClick={() => {
+          if (userGamesCount >= 3) {
+            alert('Involved in too many games!');
+          } else {
+            setShowCreateForm(true);
+          }
+        }}
+      >
+        Create Game
+      </button>
       {showCreateForm && (
-        <CreateGame 
-          onCreate={handleCreateGame} 
-          onCancel={() => setShowCreateForm(false)} 
+        <CreateGame
+          onCreate={handleCreateGame}
+          onCancel={() => setShowCreateForm(false)}
         />
       )}
-
       <div className="games-list">
-        <h3>Available Matches</h3>
-        {games.length === 0 ? (
+        {processedGames.length === 0 ? (
           <p>No matches available. Create one!</p>
         ) : (
-          games.map(game => (
-            <div 
-              key={game.id} 
-              className={`game-card ${isGameFull(game) ? 'full' : ''} ${userJoinedGame === game.id ? 'joined' : ''}`}
-            >
+          processedGames.map(game => (
+            <div key={game.id} className={`game-card${isGameFull(game) ? ' full' : ''}`}>
               <div className="game-info">
-                <h4>{game.location} Court</h4>
+                <h4>
+                  {game.date} &nbsp; {game.time} &nbsp; | &nbsp; {game.location}
+                </h4>
+                <p>
+                  Created by: <strong>{game.createdByDisplayName || "Unknown"}</strong>
+                </p>
                 <p>Players: {game.currentPlayers}/{game.maxPlayers}</p>
                 <p>Status: {isGameFull(game) ? 'Full' : 'Open'}</p>
-                {isGameCreator(game) && <span className="creator-badge">Created by you</span>}
-                
-                {/* Show telegram IDs to creator when game is full and all players have shared */}
-                {isGameCreator(game) && isGameFull(game) && allPlayersHaveTelegram(game) && (
-                  <div className="telegram-list">
-                    <h5>Player Telegram IDs:</h5>
-                    {game.players.map((player, index) => (
-                      <p key={index}>
-                        Player {index + 1}: @{player.telegramId}
-                      </p>
+                {isGameFull(game) && (
+                  <div>
+                    <h5>Player Telegram Handles:</h5>
+                    {game.players.map((player, idx) => (
+                      <div key={idx}>
+                        {player.displayName || `Player ${idx + 1}`}: @{player.telegramId || "not provided"}
+                      </div>
                     ))}
                   </div>
                 )}
               </div>
-              
-              <div className="game-actions">
-                {userJoinedGame === game.id ? (
-                  <button 
-                    className="leave-btn"
-                    onClick={() => handleLeaveGame(game.id)}
-                  >
-                    Leave
-                  </button>
-                ) : (
-                  <button 
+              {/* Conquered button: only for creator when game is full */}
+              {isGameCreator(game) && isGameFull(game) && (
+                <button className="conquered-btn" onClick={() => handleConqueredGame(game.id)}>
+                  Conquered!
+                </button>
+              )}
+              {/* Delete button: only for creator */}
+              {isGameCreator(game) && (
+                <button className="delete-btn" onClick={() => handleDeleteGame(game.id)}>
+                  Delete
+                </button>
+              )}
+              {!isGameFull(game) &&
+                !isGameCreator(game) &&
+                !userInGame(game) &&
+                userGamesCount < 3 && (
+                  <button
                     className="join-btn"
                     onClick={() => handleJoinGame(game.id)}
-                    disabled={isGameFull(game) || userJoinedGame !== null}
                   >
-                    {isGameFull(game) ? 'Full' : userJoinedGame ? 'Already joined another' : 'Join'}
+                    Join
                   </button>
                 )}
-              </div>
+              {!isGameCreator(game) && userInGame(game) && (
+                <button className="leave-btn" onClick={() => handleLeaveGame(game.id)}>
+                  Leave
+                </button>
+              )}
             </div>
           ))
         )}
       </div>
-
       {showTelegramModal && (
-        <TelegramModal 
+        <TelegramModal
           onSubmit={handleTelegramSubmit}
-          onCancel={() => setShowTelegramModal(false)}
+          onCancel={handleTelegramCancel}
         />
       )}
     </div>

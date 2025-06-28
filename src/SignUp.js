@@ -46,7 +46,7 @@ function SignUp({ onNavigate }) {
           displayName: displayName
         });
       }
-      
+
       // Send email verification to the newly created user
       if (auth.currentUser) {
         await sendEmailVerification(auth.currentUser);
@@ -129,4 +129,3 @@ function SignUp({ onNavigate }) {
 
 }
 export default SignUp;
-
