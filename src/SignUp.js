@@ -1,23 +1,21 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './SignUp.css'; 
-import { auth } from './firebase'; // Firebase auth 
+import { auth } from './firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth"; 
 
 
-// Input onNavigate prop to switch back to Login view
+
 function SignUp({ onNavigate }) {
-  // State for email, password, and display name inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState(''); // Optional: for user's display name
-  // State for displaying errors or success messages
+  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission
-    setError(''); // Clear previous errors
-    setMessage(''); // Clear previous messages
+    event.preventDefault(); 
+    setError(''); 
+    setMessage(''); 
 
     // Basic validation
     if (!email || !password) {
@@ -29,12 +27,6 @@ function SignUp({ onNavigate }) {
       setError('Password should be at least 8 characters long.');
       return;
     }
-
-    //Ensure user is from NUS
-    //if (!email.endsWith("@u.nus.edu")) {
-       // setError('Please use your NUS email.');
-       // return;
-   // }
 
     try {
       // Create a new user with email and password using Firebase
@@ -51,8 +43,6 @@ function SignUp({ onNavigate }) {
       if (auth.currentUser) {
         await sendEmailVerification(auth.currentUser);
         setMessage('Registration successful! A verification email has been sent. Please check your inbox and verify your email before logging in.');
-        // After successful signup and email sending, onAuthStateChanged detects
-        // emailVerified will be false, rendering Verification
       } else {
         setError("User created, but couldn't send verification email. Please try logging in.");
       }

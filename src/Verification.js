@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './Verification.css'; 
-import { auth } from './firebase'; // Firebase auth
+import { auth } from './firebase'; 
 import { sendEmailVerification, signOut } from 'firebase/auth';
 
 function Verification({ user }) {

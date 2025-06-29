@@ -15,7 +15,7 @@
 }
 
 .ify-text {
-  color: green; /* green color */
+  color: green;
 }
 
 .login-image-section {
@@ -50,8 +50,6 @@
   position: relative;
   filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
 }
-
-
 
 .login-container {
   flex: 1;

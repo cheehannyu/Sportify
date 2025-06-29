@@ -57,7 +57,7 @@ function App() {
     return (<div>Loading application...</div>);
   }
 
-  // User is logged in, use routing for other components
+
 return (
     <div className="App-container">
       <Routes>
@@ -73,6 +73,7 @@ return (
             )
           ) : (
             currentView === VIEWS.SIGNUP ? (
+              // Use navigateTo prop to toggle SignUp and Login
               <SignUp onNavigate={navigateTo} />
             ) : (
               <Login onNavigate={navigateTo} />

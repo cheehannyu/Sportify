@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { auth, db } from './firebase';
 import {
   collection,
@@ -30,7 +30,7 @@ function Tennis() {
     Central: false
   });
 
-  const currentUserId = auth.currentUser?.uid || "user123";
+  const currentUserId = auth.currentUser?.uid || "Unknown";
   const currentUserDisplayName = auth.currentUser?.displayName || "Unknown";
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function Tennis() {
     return () => unsubscribe();
   }, [currentUserId]);
 
-  // Filtering and always sorting by date (soonest first)
+  // Filtering and always sorting by date
   const processedGames = useMemo(() => {
     let result = [...games];
     const activeLocations = Object.entries(locationFilters)
@@ -78,7 +78,7 @@ function Tennis() {
       createdBy: currentUserId,
       createdByDisplayName: currentUserDisplayName,
       date: newGame.date,
-      time: newGame.time, // "09:00", "13:00", etc.
+      time: newGame.time, 
       players: [{
         id: currentUserId,
         telegramId: newGame.telegramId,
@@ -178,7 +178,6 @@ function Tennis() {
     <div className="tennis-container">
       <h2>Find or create tennis matches in your area</h2>
 
-      {/* Centered Location Filter */}
       <div className="location-filter-bar">
         <label className="location-filter-label">Filter by Location:</label>
         <div className="location-filter-options">
@@ -240,13 +239,11 @@ function Tennis() {
                   </div>
                 )}
               </div>
-              {/* Conquered button: only for creator when game is full */}
               {isGameCreator(game) && isGameFull(game) && (
                 <button className="conquered-btn" onClick={() => handleConqueredGame(game.id)}>
                   Conquered!
                 </button>
               )}
-              {/* Delete button: only for creator */}
               {isGameCreator(game) && (
                 <button className="delete-btn" onClick={() => handleDeleteGame(game.id)}>
                   Delete

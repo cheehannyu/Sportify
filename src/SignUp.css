@@ -4,7 +4,6 @@
   box-sizing: border-box;
 }
 
-/* Main container - full viewport with background */
 .signup-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d4a2d 50%, #1a1a1a 100%);
@@ -16,7 +15,6 @@
   position: relative;
 }
 
-/* Background overlay for extra depth */
 .signup-page::before {
   content: '';
   position: absolute;
@@ -30,8 +28,8 @@
 
 .signup-container {
   width: 100%;
-  max-width: 40%; /* 40% of the page width */
-  min-width: 450px; /* Minimum width for smaller screens */
+  max-width: 40%;
+  min-width: 450px;
   padding: 3rem;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(15px);
@@ -196,5 +194,3 @@
   color: #66bb6a;
   text-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
 }
-
-/* Responsive design */

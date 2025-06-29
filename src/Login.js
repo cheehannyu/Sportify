@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './Login.css'; 
-import { auth } from './firebase'; // Firebase auth 
-import { signInWithEmailAndPassword } from "firebase/auth"; // Firebase sign-in 
+import { auth } from './firebase'; 
+import { signInWithEmailAndPassword } from "firebase/auth"; 
 
-// input onNavigate prop to switch to SignUp view
 function Login({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +19,6 @@ function Login({ onNavigate }) {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged in App.js will handle navigation
     } catch (err) {
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setError('Invalid email or password.');
@@ -49,9 +47,9 @@ function Login({ onNavigate }) {
         <div className="login-form-wrapper">
           <form onSubmit={handleSubmit} className="login-form">
             <h2>
-  <span className="sport-text">SPORT</span>
-  <span className="ify-text">IFY</span>
-</h2>
+              <span className="sport-text">SPORT</span>
+              <span className="ify-text">IFY</span>
+            </h2>
 
             <p className="login-subtitle">Start playing!</p>
             

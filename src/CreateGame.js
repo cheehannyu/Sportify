@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import "./CreateGame.css";
 
 function CreateGame({ onCreate, onCancel }) {
@@ -99,7 +99,7 @@ function CreateGame({ onCreate, onCancel }) {
           value={time}
           onChange={e => setTime(e.target.value)}
           required
-          step="3600" // restrict to clean hours
+          step="3600" // restricted to eg 1900hrs
         />
       </div>
 

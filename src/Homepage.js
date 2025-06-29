@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './Homepage.css';
 import { useNavigate } from 'react-router-dom';
 
 function Homepage({ username, onLogout }) {
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
   const stats = {
@@ -12,7 +11,7 @@ function Homepage({ username, onLogout }) {
     reviews: 0
   };
 
-  const userHistory = [];
+  const userHistory = []; // Dummy, to be integrated with Conquered button later
 
   const sports = [
     { id: 1, name: 'Football', icon: '/Messi.png', athlete: 'Messi', description: 'Tiki taka magic', color: '#2196F3', quote: "It took me 17 years and 114 days to become an overnight success." },
@@ -54,9 +53,9 @@ function Homepage({ username, onLogout }) {
         <button
           className="user-menu-toggle"
           aria-label='Menu'
-          onClick={() => handleMenuClick}
+          onClick={() => handleMenuClick} // Dummy button, to be developed into user profile later on
         >
-          ☰
+          ☰ 
         </button>
         <button
           className="logout-button"
