@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import './Homepage.css';
 import { useNavigate } from 'react-router-dom';
+import ReportModal from "./ReportModal";
+
 
 function Homepage({ username, onLogout }) {
   const [showHistory, setShowHistory] = useState(false);
@@ -11,7 +13,7 @@ function Homepage({ username, onLogout }) {
     reviews: 0
   };
 
-  const userHistory = []; // Dummy, to be integrated with Conquered button later
+  const userHistory = []; // To be integrated with Conquered button later
 
   const sports = [
     { id: 1, name: 'Football', icon: '/Messi.png', athlete: 'Messi', description: 'Tiki taka magic', color: '#2196F3', quote: "It took me 17 years and 114 days to become an overnight success." },
@@ -42,10 +44,32 @@ function Homepage({ username, onLogout }) {
 
   const statFeatures = [
     { label: "Sports Conquered", value: stats.conquered, emoji: "🏆" },
-    { label: "Hours Played", value: stats.hours, emoji: "⏳" },
-    { label: "Reviews", value: stats.reviews, emoji: "⭐" }
+  
   ];
 
+   /*const [modalItem, setModalItem] = useState(null);
+  const [reportedIds, setReportedIds] = useState([]);
+
+  // Add report submission handler:
+  const handleReport = async ({ reportedName, reason }) => {
+    if (!modalItem) return;
+    try {
+      await addDoc(collection(db, "playerReports"), {
+        gameId: modalItem.id || `game-${modalItem.idx}`,
+        reporterId: username, // or userId if you have it
+        reportedName,
+        reason,
+        timestamp: serverTimestamp()
+      });
+      setReportedIds(ids => [...ids, modalItem.id || modalItem.idx]);
+      setModalItem(null);
+      alert("Report submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      alert("Failed to submit report. Please try again.");
+    }
+  };
+*/
   return (
     <div className="homepage-container">
       <header className="homepage-header">
