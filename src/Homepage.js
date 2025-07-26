@@ -1,24 +1,15 @@
 import { useState } from 'react';
-import './Homepage.css';
 import { useNavigate } from 'react-router-dom';
-import ReportModal from "./ReportModal";
+import MatchHistory from './MatchHistory';
+import './Homepage.css';
 
-
-function Homepage({ username, onLogout }) {
+function Homepage({ username, userId, onLogout }) {
   const [showHistory, setShowHistory] = useState(false);
-
-  const stats = {
-    conquered: 0,
-    hours: 0,
-    reviews: 0
-  };
-
-  const userHistory = []; // To be integrated with Conquered button later
 
   const sports = [
     { id: 1, name: 'Football', icon: '/Messi.png', athlete: 'Messi', description: 'Tiki taka magic', color: '#2196F3', quote: "It took me 17 years and 114 days to become an overnight success." },
     { id: 2, name: 'Table Tennis', icon: '/TT.png', athlete: 'Ma Long', description: 'Ping pong perfection', quote: "Focus on the present point, not the last one or the next one.", color: '#FF9800' },
-    { id: 3, name: 'Tennis', icon: '/Serena.png', athlete: 'Serena Williams', description: 'Game.Set.Match', quote: "I really think a champion is defined not by their wins but by how they can recover when they fall.", color: '#E91E63' },
+    { id: 3, name: 'Tennis', icon: '/Serena.png', athlete: 'Serena Williams', description: 'Game.Set.Match', quote: "A champion is defined not by their wins but by how they recover when they fall.", color: '#E91E63' },
     { id: 4, name: 'Badminton', icon: '/LeeCW.png', athlete: 'Lee Chong Wei', description: 'Smash it up', quote: "Even if you're not winning, you can still be successful. Success is about giving your best effort.", color: '#9C27B0' },
     { id: 5, name: 'Basketball', icon: '/Lebron.png', athlete: 'LeBron James', description: 'King of the court', quote: 'I have failed over and over and over again in my life, and that is why I succeed.', color: '#FF5722' },
     { id: 6, name: 'Squash', icon: '/Squash.png', athlete: 'Ramy Ashour', description: 'Racquet precision', quote: 'You need both physical and mental strength to dominate.', color: '#607D8B' },
@@ -40,112 +31,62 @@ function Homepage({ username, onLogout }) {
     navigate(routeMap[sport.name]);
   };
 
-  const handleMenuClick = () => {};
-
-  const statFeatures = [
-    { label: "Sports Conquered", value: stats.conquered, emoji: "🏆" },
-  
-  ];
-
-   /*const [modalItem, setModalItem] = useState(null);
-  const [reportedIds, setReportedIds] = useState([]);
-
-  // Add report submission handler:
-  const handleReport = async ({ reportedName, reason }) => {
-    if (!modalItem) return;
-    try {
-      await addDoc(collection(db, "playerReports"), {
-        gameId: modalItem.id || `game-${modalItem.idx}`,
-        reporterId: username, // or userId if you have it
-        reportedName,
-        reason,
-        timestamp: serverTimestamp()
-      });
-      setReportedIds(ids => [...ids, modalItem.id || modalItem.idx]);
-      setModalItem(null);
-      alert("Report submitted successfully!");
-    } catch (error) {
-      console.error("Error submitting report:", error);
-      alert("Failed to submit report. Please try again.");
-    }
-  };
-*/
   return (
     <div className="homepage-container">
       <header className="homepage-header">
-        <span className="welcome-text">Welcome, { username }!</span>
-        <button
-          className="user-menu-toggle"
-          aria-label='Menu'
-          onClick={() => handleMenuClick} // Dummy button, to be developed into user profile later on
-        >
-          ☰ 
-        </button>
-        <button
-          className="logout-button"
-          onClick={onLogout}
-        >
-          Logout
-        </button>
+        <div className="welcome-text">Welcome, {username || 'Player'}</div>
+        <button className="logout-button" onClick={onLogout}>Logout</button>
       </header>
 
-      <main className="homepage-content">
+      <div className="homepage-content">
         <h2>Choose Your Sport</h2>
         <p>Select a sport to get matched!</p>
+
         <div className="sports-list">
-          {sports.map(sport => (
+          {sports.map((sport) => (
             <div
               key={sport.id}
               className="feature-box"
               style={{ borderColor: sport.color }}
               onClick={() => handleSportClick(sport)}
+              tabIndex={0}
+              role="button"
+              aria-pressed="false"
             >
-              <img src={sport.icon} alt={sport.name} />
+              <img src={sport.icon} alt={`${sport.name} icon`} />
               <h3 style={{ color: sport.color }}>{sport.name}</h3>
               <p>{sport.description}</p>
-              <p><strong>{sport.athlete}</strong></p>
-              <p><em>"{sport.quote}"</em></p>
+              <strong>{sport.athlete}</strong>
+              <em>"{sport.quote}"</em>
             </div>
           ))}
         </div>
-        <div className="stats-section">
-          {statFeatures.map((stat, idx) => (
-            <div className="stats-box" key={idx}>
-              <h3>
-                <span role="img" aria-label={stat.label}>{stat.emoji}</span> {stat.value}
-              </h3>
-              <p>{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </main>
+      </div>
 
+      {/* Bottom-right toggle button for showing/hiding Match History */}
       <button
         className="history-button"
-        title="History"
-        onClick={() => setShowHistory(!showHistory)}
+        aria-label="Toggle Match History"
+        onClick={() => setShowHistory(prev => !prev)}
       >
-        📜
+        📖
       </button>
 
+      {/* Match History Sidebar */}
       {showHistory && (
-        <div className="history-sidebar">
+        <aside className="history-sidebar">
           <div className="history-header">
-            <span>Match History</span>
-            <button className="close-history" onClick={() => setShowHistory(false)}>✖</button>
+            <h3>Match History</h3>
+            <button
+              className="close-history"
+              aria-label="Close Match History"
+              onClick={() => setShowHistory(false)}
+            >
+              ✕
+            </button>
           </div>
-          <ul className="history-list">
-            {userHistory.length === 0 ? (
-              <li>No history yet.</li>
-            ) : (
-              userHistory.map((item, idx) => (
-                <li key={idx}>
-                  <strong>{item.sport}</strong> – {item.date} ({item.result})
-                </li>
-              ))
-            )}
-          </ul>
-        </div>
+          <MatchHistory userId={userId} />
+        </aside>
       )}
     </div>
   );
