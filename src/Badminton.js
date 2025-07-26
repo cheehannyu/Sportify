@@ -14,16 +14,13 @@ import CreateGame from './CreateGame';
 import TelegramModal from './TelegramModal';
 import './Badminton.css';
 
-
-
 function Badminton() {
-   const [games, setGames] = useState([]);
+  const [games, setGames] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [userGamesCount, setUserGamesCount] = useState(0);
 
-  // Filter state
   const [locationFilters, setLocationFilters] = useState({
     North: false,
     South: false,
@@ -36,7 +33,7 @@ function Badminton() {
   const currentUserDisplayName = auth.currentUser?.displayName || "Unknown";
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "badmintonGames"), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db , "badmintonGames"), (snapshot) => {
       const fetchedGames = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setGames(fetchedGames);
 
@@ -48,7 +45,6 @@ function Badminton() {
     return () => unsubscribe();
   }, [currentUserId]);
 
-  // Filtering and always sorting by date
   const processedGames = useMemo(() => {
     let result = [...games];
     const activeLocations = Object.entries(locationFilters)
@@ -93,7 +89,7 @@ function Badminton() {
 
   const handleJoinGame = async (gameId) => {
     if (userGamesCount >= 3) {
-      alert('You can only be in a maximum of 3 tennis games at once.');
+      alert('You can only be in a maximum of 3 badminton games at once.');
       return;
     }
     const gameRef = doc(db, "badmintonGames", gameId);
@@ -133,21 +129,20 @@ function Badminton() {
   };
 
   const handleTelegramCancel = async () => {
-  if (!selectedGameId) return;
-  const gameRef = doc(db, "badmintonGames", selectedGameId);
-  const gameSnap = await getDoc(gameRef);
-  if (gameSnap.exists()) {
-    const game = gameSnap.data();
-    const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
-    await updateDoc(gameRef, {
-      currentPlayers: game.currentPlayers - 1,
-      players: updatedPlayers
-    });
-  }
-  setShowTelegramModal(false);
-  setSelectedGameId(null);
-};
-
+    if (!selectedGameId) return;
+    const gameRef = doc(db, "badmintonGames", selectedGameId);
+    const gameSnap = await getDoc(gameRef);
+    if (gameSnap.exists()) {
+      const game = gameSnap.data();
+      const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
+      await updateDoc(gameRef, {
+        currentPlayers: game.currentPlayers - 1,
+        players: updatedPlayers
+      });
+    }
+    setShowTelegramModal(false);
+    setSelectedGameId(null);
+  };
 
   const handleLeaveGame = async (gameId) => {
     const gameRef = doc(db, "badmintonGames", gameId);
@@ -167,17 +162,46 @@ function Badminton() {
     await deleteDoc(doc(db, "badmintonGames", gameId));
   };
 
-  const handleConqueredGame = async (gameId) => {
-    if (!window.confirm("Are you sure you've conquered this game?")) return;
-    await deleteDoc(doc(db, "badmintonGames", gameId));
-  };
+  // Add game to conqueredGames and remove from badmintonGames
+  const handleConqueredGame = async (game) => {
+  if (!window.confirm("Are you sure you've conquered this game?")) return;
+
+  try {
+    // Pull the full badminton game document to get player info
+    const gameRef = doc(db, "badmintonGames", game.id);
+    const gameSnap = await getDoc(gameRef);
+
+    if (!gameSnap.exists()) {
+      alert("Game not found.");
+      return;
+    }
+
+    const gameData = gameSnap.data();
+
+    await addDoc(collection(db, "conqueredGames"), {
+      gameId: game.id,
+      userId: currentUserId,
+      date: gameData.date || null,
+      type: "badminton",
+      players: gameData.players || [],
+      timestamp: new Date(),
+    });
+
+    await deleteDoc(gameRef);
+
+    alert("Game marked as conquered!");
+  } catch (error) {
+    console.error("Error marking game conquered:", error);
+    alert("Failed to mark as conquered. Try again.");
+  }
+};
 
   const isGameCreator = (game) => game.createdBy === currentUserId;
   const isGameFull = (game) => game.currentPlayers === game.maxPlayers;
   const userInGame = (game) => game.players.some(player => player.id === currentUserId);
 
   return (
-    <div className="badmintain-container">
+    <div className="badminton-container">
       <h2>Find or create badminton matches in your area</h2>
 
       <div className="location-filter-bar">
@@ -242,7 +266,7 @@ function Badminton() {
                 )}
               </div>
               {isGameCreator(game) && isGameFull(game) && (
-                <button className="conquered-btn" onClick={() => handleConqueredGame(game.id)}>
+                <button className="conquered-btn" onClick={() => handleConqueredGame(game)}>
                   Conquered!
                 </button>
               )}
@@ -271,7 +295,7 @@ function Badminton() {
           ))
         )}
       </div>
-      {showTelegramModal && (
+      {showTelegramModal && !!selectedGameId && (
         <TelegramModal
           onSubmit={handleTelegramSubmit}
           onCancel={handleTelegramCancel}
@@ -280,4 +304,5 @@ function Badminton() {
     </div>
   );
 }
+
 export default Badminton;

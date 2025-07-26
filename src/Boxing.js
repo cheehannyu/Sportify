@@ -12,18 +12,15 @@ import {
 } from "firebase/firestore";
 import CreateGame from './CreateGame';
 import TelegramModal from './TelegramModal';
-import './Boxing.css';
-
-
+import './boxing.css';
 
 function Boxing() {
-   const [games, setGames] = useState([]);
+  const [games, setGames] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [userGamesCount, setUserGamesCount] = useState(0);
 
-  // Filter state
   const [locationFilters, setLocationFilters] = useState({
     North: false,
     South: false,
@@ -48,7 +45,6 @@ function Boxing() {
     return () => unsubscribe();
   }, [currentUserId]);
 
-  // Filtering and always sorting by date
   const processedGames = useMemo(() => {
     let result = [...games];
     const activeLocations = Object.entries(locationFilters)
@@ -133,21 +129,20 @@ function Boxing() {
   };
 
   const handleTelegramCancel = async () => {
-  if (!selectedGameId) return;
-  const gameRef = doc(db, "boxingGames", selectedGameId);
-  const gameSnap = await getDoc(gameRef);
-  if (gameSnap.exists()) {
-    const game = gameSnap.data();
-    const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
-    await updateDoc(gameRef, {
-      currentPlayers: game.currentPlayers - 1,
-      players: updatedPlayers
-    });
-  }
-  setShowTelegramModal(false);
-  setSelectedGameId(null);
-};
-
+    if (!selectedGameId) return;
+    const gameRef = doc(db, "boxingGames", selectedGameId);
+    const gameSnap = await getDoc(gameRef);
+    if (gameSnap.exists()) {
+      const game = gameSnap.data();
+      const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
+      await updateDoc(gameRef, {
+        currentPlayers: game.currentPlayers - 1,
+        players: updatedPlayers
+      });
+    }
+    setShowTelegramModal(false);
+    setSelectedGameId(null);
+  };
 
   const handleLeaveGame = async (gameId) => {
     const gameRef = doc(db, "boxingGames", gameId);
@@ -167,10 +162,39 @@ function Boxing() {
     await deleteDoc(doc(db, "boxingGames", gameId));
   };
 
-  const handleConqueredGame = async (gameId) => {
-    if (!window.confirm("Are you sure you've conquered this game?")) return;
-    await deleteDoc(doc(db, "boxingGames", gameId));
-  };
+  // Add game to conqueredGames and remove from boxingGames
+  const handleConqueredGame = async (game) => {
+  if (!window.confirm("Are you sure you've conquered this game?")) return;
+
+  try {
+    // Pull the full boxing game document to get player info
+    const gameRef = doc(db, "boxingGames", game.id);
+    const gameSnap = await getDoc(gameRef);
+
+    if (!gameSnap.exists()) {
+      alert("Game not found.");
+      return;
+    }
+
+    const gameData = gameSnap.data();
+
+    await addDoc(collection(db, "conqueredGames"), {
+      gameId: game.id,
+      userId: currentUserId,
+      date: gameData.date || null,
+      type: "boxing",
+      players: gameData.players || [],
+      timestamp: new Date(),
+    });
+
+    await deleteDoc(gameRef);
+
+    alert("Game marked as conquered!");
+  } catch (error) {
+    console.error("Error marking game conquered:", error);
+    alert("Failed to mark as conquered. Try again.");
+  }
+};
 
   const isGameCreator = (game) => game.createdBy === currentUserId;
   const isGameFull = (game) => game.currentPlayers === game.maxPlayers;
@@ -242,7 +266,7 @@ function Boxing() {
                 )}
               </div>
               {isGameCreator(game) && isGameFull(game) && (
-                <button className="conquered-btn" onClick={() => handleConqueredGame(game.id)}>
+                <button className="conquered-btn" onClick={() => handleConqueredGame(game)}>
                   Conquered!
                 </button>
               )}
@@ -271,7 +295,7 @@ function Boxing() {
           ))
         )}
       </div>
-      {showTelegramModal && (
+      {showTelegramModal && !!selectedGameId && (
         <TelegramModal
           onSubmit={handleTelegramSubmit}
           onCancel={handleTelegramCancel}
@@ -280,4 +304,5 @@ function Boxing() {
     </div>
   );
 }
+
 export default Boxing;

@@ -14,18 +14,13 @@ import CreateGame from './CreateGame';
 import TelegramModal from './TelegramModal';
 import './TableTennis.css';
 
-
-
-
-
 function TableTennis() {
- const [games, setGames] = useState([]);
+  const [games, setGames] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [userGamesCount, setUserGamesCount] = useState(0);
 
-  // Filter state
   const [locationFilters, setLocationFilters] = useState({
     North: false,
     South: false,
@@ -38,7 +33,7 @@ function TableTennis() {
   const currentUserDisplayName = auth.currentUser?.displayName || "Unknown";
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "tabletennisGames"), (snapshot) => {
+    const unsubscribe = onSnapshot(collection(db, "tableTennisGames"), (snapshot) => {
       const fetchedGames = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setGames(fetchedGames);
 
@@ -50,7 +45,6 @@ function TableTennis() {
     return () => unsubscribe();
   }, [currentUserId]);
 
-  // Filtering and always sorting by date
   const processedGames = useMemo(() => {
     let result = [...games];
     const activeLocations = Object.entries(locationFilters)
@@ -75,7 +69,7 @@ function TableTennis() {
       alert('Involved in too many games!');
       return;
     }
-    await addDoc(collection(db, "tabletennisGames"), {
+    await addDoc(collection(db, "tableTennisGames"), {
       location: newGame.location,
       maxPlayers: newGame.maxPlayers,
       currentPlayers: 1,
@@ -95,10 +89,10 @@ function TableTennis() {
 
   const handleJoinGame = async (gameId) => {
     if (userGamesCount >= 3) {
-      alert('You can only be in a maximum of 3 tennis games at once.');
+      alert('You can only be in a maximum of 3 table tennis games at once.');
       return;
     }
-    const gameRef = doc(db, "tabletennisGames", gameId);
+    const gameRef = doc(db, "tableTennisGames", gameId);
     const gameSnap = await getDoc(gameRef);
     if (gameSnap.exists()) {
       const game = gameSnap.data();
@@ -121,7 +115,7 @@ function TableTennis() {
 
   const handleTelegramSubmit = async (telegramId) => {
     if (!selectedGameId) return;
-    const gameRef = doc(db, "tabletennisGames", selectedGameId);
+    const gameRef = doc(db, "tableTennisGames", selectedGameId);
     const gameSnap = await getDoc(gameRef);
     if (gameSnap.exists()) {
       const game = gameSnap.data();
@@ -135,24 +129,23 @@ function TableTennis() {
   };
 
   const handleTelegramCancel = async () => {
-  if (!selectedGameId) return;
-  const gameRef = doc(db, "tabletennisGames", selectedGameId);
-  const gameSnap = await getDoc(gameRef);
-  if (gameSnap.exists()) {
-    const game = gameSnap.data();
-    const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
-    await updateDoc(gameRef, {
-      currentPlayers: game.currentPlayers - 1,
-      players: updatedPlayers
-    });
-  }
-  setShowTelegramModal(false);
-  setSelectedGameId(null);
-};
-
+    if (!selectedGameId) return;
+    const gameRef = doc(db, "tableTennisGames", selectedGameId);
+    const gameSnap = await getDoc(gameRef);
+    if (gameSnap.exists()) {
+      const game = gameSnap.data();
+      const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
+      await updateDoc(gameRef, {
+        currentPlayers: game.currentPlayers - 1,
+        players: updatedPlayers
+      });
+    }
+    setShowTelegramModal(false);
+    setSelectedGameId(null);
+  };
 
   const handleLeaveGame = async (gameId) => {
-    const gameRef = doc(db, "tabletennisGames", gameId);
+    const gameRef = doc(db, "tableTennisGames", gameId);
     const gameSnap = await getDoc(gameRef);
     if (gameSnap.exists()) {
       const game = gameSnap.data();
@@ -166,13 +159,42 @@ function TableTennis() {
 
   const handleDeleteGame = async (gameId) => {
     if (!window.confirm("Are you sure you want to delete this game?")) return;
-    await deleteDoc(doc(db, "tabletennisGames", gameId));
+    await deleteDoc(doc(db, "tableTennisGames", gameId));
   };
 
-  const handleConqueredGame = async (gameId) => {
-    if (!window.confirm("Are you sure you've conquered this game?")) return;
-    await deleteDoc(doc(db, "tabletennisGames", gameId));
-  };
+  // Add game to conqueredGames and remove from tableTennisGames
+  const handleConqueredGame = async (game) => {
+  if (!window.confirm("Are you sure you've conquered this game?")) return;
+
+  try {
+    // Pull the full table tennis game document to get player info
+    const gameRef = doc(db, "tableTennisGames", game.id);
+    const gameSnap = await getDoc(gameRef);
+
+    if (!gameSnap.exists()) {
+      alert("Game not found.");
+      return;
+    }
+
+    const gameData = gameSnap.data();
+
+    await addDoc(collection(db, "conqueredGames"), {
+      gameId: game.id,
+      userId: currentUserId,
+      date: gameData.date || null,
+      type: "table tennis",
+      players: gameData.players || [],
+      timestamp: new Date(),
+    });
+
+    await deleteDoc(gameRef);
+
+    alert("Game marked as conquered!");
+  } catch (error) {
+    console.error("Error marking game conquered:", error);
+    alert("Failed to mark as conquered. Try again.");
+  }
+};
 
   const isGameCreator = (game) => game.createdBy === currentUserId;
   const isGameFull = (game) => game.currentPlayers === game.maxPlayers;
@@ -180,7 +202,7 @@ function TableTennis() {
 
   return (
     <div className="tabletennis-container">
-      <h2>Find or create Tabletennis matches in your area</h2>
+      <h2>Find or create table tennis matches in your area</h2>
 
       <div className="location-filter-bar">
         <label className="location-filter-label">Filter by Location:</label>
@@ -198,7 +220,7 @@ function TableTennis() {
         </div>
       </div>
 
-      <p className="user-stats">You are currently in {userGamesCount}/3 Tabletennis games</p>
+      <p className="user-stats">You are currently in {userGamesCount}/3 table tennis games</p>
       <button 
         className="create-game-btn" 
         onClick={() => {
@@ -244,7 +266,7 @@ function TableTennis() {
                 )}
               </div>
               {isGameCreator(game) && isGameFull(game) && (
-                <button className="conquered-btn" onClick={() => handleConqueredGame(game.id)}>
+                <button className="conquered-btn" onClick={() => handleConqueredGame(game)}>
                   Conquered!
                 </button>
               )}
@@ -273,7 +295,7 @@ function TableTennis() {
           ))
         )}
       </div>
-      {showTelegramModal && (
+      {showTelegramModal && !!selectedGameId && (
         <TelegramModal
           onSubmit={handleTelegramSubmit}
           onCancel={handleTelegramCancel}

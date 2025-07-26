@@ -14,17 +14,13 @@ import CreateGame from './CreateGame';
 import TelegramModal from './TelegramModal';
 import './Squash.css';
 
-
-
 function Squash() {
-  
   const [games, setGames] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState(null);
   const [userGamesCount, setUserGamesCount] = useState(0);
 
-  // Filter state
   const [locationFilters, setLocationFilters] = useState({
     North: false,
     South: false,
@@ -49,7 +45,6 @@ function Squash() {
     return () => unsubscribe();
   }, [currentUserId]);
 
-  // Filtering and always sorting by date
   const processedGames = useMemo(() => {
     let result = [...games];
     const activeLocations = Object.entries(locationFilters)
@@ -134,21 +129,20 @@ function Squash() {
   };
 
   const handleTelegramCancel = async () => {
-  if (!selectedGameId) return;
-  const gameRef = doc(db, "squashGames", selectedGameId);
-  const gameSnap = await getDoc(gameRef);
-  if (gameSnap.exists()) {
-    const game = gameSnap.data();
-    const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
-    await updateDoc(gameRef, {
-      currentPlayers: game.currentPlayers - 1,
-      players: updatedPlayers
-    });
-  }
-  setShowTelegramModal(false);
-  setSelectedGameId(null);
-};
-
+    if (!selectedGameId) return;
+    const gameRef = doc(db, "squashGames", selectedGameId);
+    const gameSnap = await getDoc(gameRef);
+    if (gameSnap.exists()) {
+      const game = gameSnap.data();
+      const updatedPlayers = game.players.filter(player => player.id !== currentUserId);
+      await updateDoc(gameRef, {
+        currentPlayers: game.currentPlayers - 1,
+        players: updatedPlayers
+      });
+    }
+    setShowTelegramModal(false);
+    setSelectedGameId(null);
+  };
 
   const handleLeaveGame = async (gameId) => {
     const gameRef = doc(db, "squashGames", gameId);
@@ -165,13 +159,42 @@ function Squash() {
 
   const handleDeleteGame = async (gameId) => {
     if (!window.confirm("Are you sure you want to delete this game?")) return;
-    await deleteDoc(doc(db, "sqaushGames", gameId));
-  };
-
-  const handleConqueredGame = async (gameId) => {
-    if (!window.confirm("Are you sure you've conquered this game?")) return;
     await deleteDoc(doc(db, "squashGames", gameId));
   };
+
+  // Add game to conqueredGames and remove from squashGames
+  const handleConqueredGame = async (game) => {
+  if (!window.confirm("Are you sure you've conquered this game?")) return;
+
+  try {
+    // Pull the full squash game document to get player info
+    const gameRef = doc(db, "squashGames", game.id);
+    const gameSnap = await getDoc(gameRef);
+
+    if (!gameSnap.exists()) {
+      alert("Game not found.");
+      return;
+    }
+
+    const gameData = gameSnap.data();
+
+    await addDoc(collection(db, "conqueredGames"), {
+      gameId: game.id,
+      userId: currentUserId,
+      date: gameData.date || null,
+      type: "squash",
+      players: gameData.players || [],
+      timestamp: new Date(),
+    });
+
+    await deleteDoc(gameRef);
+
+    alert("Game marked as conquered!");
+  } catch (error) {
+    console.error("Error marking game conquered:", error);
+    alert("Failed to mark as conquered. Try again.");
+  }
+};
 
   const isGameCreator = (game) => game.createdBy === currentUserId;
   const isGameFull = (game) => game.currentPlayers === game.maxPlayers;
@@ -179,7 +202,7 @@ function Squash() {
 
   return (
     <div className="squash-container">
-      <h2>Find or create sqaush matches in your area</h2>
+      <h2>Find or create squash matches in your area</h2>
 
       <div className="location-filter-bar">
         <label className="location-filter-label">Filter by Location:</label>
@@ -197,7 +220,7 @@ function Squash() {
         </div>
       </div>
 
-      <p className="user-stats">You are currently in {userGamesCount}/3 sqaush games</p>
+      <p className="user-stats">You are currently in {userGamesCount}/3 squash games</p>
       <button 
         className="create-game-btn" 
         onClick={() => {
@@ -243,7 +266,7 @@ function Squash() {
                 )}
               </div>
               {isGameCreator(game) && isGameFull(game) && (
-                <button className="conquered-btn" onClick={() => handleConqueredGame(game.id)}>
+                <button className="conquered-btn" onClick={() => handleConqueredGame(game)}>
                   Conquered!
                 </button>
               )}
@@ -272,7 +295,7 @@ function Squash() {
           ))
         )}
       </div>
-      {showTelegramModal && (
+      {showTelegramModal && !!selectedGameId && (
         <TelegramModal
           onSubmit={handleTelegramSubmit}
           onCancel={handleTelegramCancel}
