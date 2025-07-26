@@ -1,66 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ReportModal.css";
 
-export default function ReportModal({ isOpen, onClose, onSubmit, possiblePlayers }) {
-  const [reportedName, setReportedName] = useState("");
+export default function ReportModal({ isOpen, onClose, onSubmit, modalGame, userId }) {
+  const [reportedUserId, setReportedUserId] = useState("");
   const [reason, setReason] = useState("");
+
+  // Reset form values each time modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setReportedUserId("");
+      setReason("");
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ reportedName, reason });
-    setReportedName("");
-    setReason("");
+
+    if (!reportedUserId.trim() || !reason.trim()) {
+      alert("Please provide both User ID and a reason.");
+      return;
+    }
+
+    // Build report object including required fields
+    const report = {
+      reportedUserId: reportedUserId.trim(),
+      reporterUserId: userId,
+      reason: reason.trim(),
+      date: new Date().toISOString(),
+      gameId: modalGame?.id || null,
+      gameType: modalGame?.type || "Unknown",
+    };
+
+    onSubmit(report);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop">
+    <div className="report-modal-backdrop">
       <div className="report-modal">
-        <h3>Report Player</h3>
         <form onSubmit={handleSubmit}>
-          <label htmlFor="report-player-name">Player Name</label>
-          {possiblePlayers?.length > 0 ? (
-            <select
-              id="report-player-name"
-              value={reportedName}
-              required
-              onChange={e => setReportedName(e.target.value)}
-            >
-              <option value="">Select Player...</option>
-              {possiblePlayers.map(p => (
-                <option value={p} key={p}>{p}</option>
-              ))}
-            </select>
-          ) : (
-            <input
-              id="report-player-name"
-              type="text"
-              required
-              placeholder="Enter player's display name/username"
-              value={reportedName}
-              onChange={e => setReportedName(e.target.value)}
-            />
-          )}
+          <h2>Report a Player</h2>
 
-          <label htmlFor="report-reason">Reason</label>
-          <select
-            id="report-reason"
+          <label htmlFor="reportedUserId">User ID to Report</label>
+          <input
+            id="reportedUserId"
+            type="text"
+            placeholder="Enter User ID"
+            value={reportedUserId}
+            onChange={(e) => setReportedUserId(e.target.value)}
             required
+          />
+
+          <label htmlFor="reason">Reason</label>
+          <textarea
+            id="reason"
+            placeholder="State your reason"
             value={reason}
-            onChange={e => setReason(e.target.value)}
-          >
-            <option value="">Select Reason...</option>
-            <option value="Misconduct">Misconduct</option>
-            <option value="Cheating">Cheating</option>
-            <option value="Abusive Language">Abusive Language</option>
-            <option value="Other">Other</option>
-          </select>
-          <div className="modal-actions">
+            onChange={(e) => setReason(e.target.value)}
+            required
+          />
+
+          <div className="report-modal-actions">
+            <button type="submit">Submit Report</button>
             <button type="button" onClick={onClose}>Cancel</button>
-            <button type="submit" disabled={!reportedName || !reason}>
-              Submit Report
-            </button>
           </div>
         </form>
       </div>

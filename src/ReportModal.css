@@ -1,0 +1,93 @@
+.report-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(35, 40, 40, 0.23);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.report-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 22px 20px 22px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.report-modal h2 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  font-size: 1.3em;
+  color: #e74c3c;
+}
+
+.report-modal label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #222;
+}
+
+.report-modal input[type='text'],
+.report-modal textarea {
+  width: 100%;
+  padding: 10px 8px;
+  margin-bottom: 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  font-size: 1em;
+  font-family: inherit;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.report-modal textarea {
+  min-height: 60px;
+  max-height: 180px;
+}
+
+.report-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.report-modal button[type='submit'] {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 20px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s;
+}
+
+.report-modal button[type='submit']:hover {
+  background: #b63223;
+}
+
+.report-modal button[type='button'] {
+  background: #f2f2f2;
+  color: #555;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 18px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.14s;
+}
+
+.report-modal button[type='button']:hover {
+  background: #ededed;
+}
