@@ -36,14 +36,14 @@ function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setIsBanned(false); // reset ban status on user change
+      setIsBanned(false); 
       setCurrentUser(user);
 
       if (user) {
         setCurrentView(null);
         setCheckingBan(true);
         try {
-          // Query reports where this user is the reportedUserId
+          
           const reportsQuery = query(
             collection(db, 'gameReports'),
             where('reportedUserId', '==', user.uid)
@@ -51,14 +51,12 @@ function App() {
           const reportsSnapshot = await getDocs(reportsQuery);
           if (reportsSnapshot.size >= 5) {
             setIsBanned(true);
-            // Immediately sign out banned user
             await signOut(auth);
             setCurrentUser(null);
             setCurrentView(VIEWS.LOGIN);
           }
         } catch (error) {
           console.error('Failed to check ban status:', error);
-          // Proceed without banning on error
           setIsBanned(false);
         } finally {
           setCheckingBan(false);
@@ -87,30 +85,6 @@ function App() {
   // Show loading while authenticating or checking ban state
   if (isLoading || checkingBan) {
     return (<div>Loading application...</div>);
-  }
-
-  // Show ban message as a simple inline UI, user cannot proceed until banned status is cleared
-  if (isBanned) {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-          backgroundColor: 'white',
-          padding: 30,
-          textAlign: 'center',
-        }}
-      >
-        <h2 style={{ color: '#e53935', fontWeight: 'bold', marginBottom: 20 }}>
-          Your account has been banned
-        </h2>
-        <p>Thank you for using Sportify.</p>
-        <p>Please contact support if you believe this is a mistake.</p>
-      </div>
-    );
   }
 
   return (

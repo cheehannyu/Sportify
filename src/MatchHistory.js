@@ -18,7 +18,6 @@ export default function MatchHistory({ userId }) {
   const [modalGame, setModalGame] = useState(null);
   const [reportedGameIds, setReportedGameIds] = useState(new Set());
 
-  // 1. Get conquered games where the current user was a player
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "conqueredGames"),
@@ -28,7 +27,6 @@ export default function MatchHistory({ userId }) {
           ...doc.data(),
         }));
 
-        // Only include games where the user ID is in the players array
         const filteredGames = allGames.filter(
           (game) =>
             Array.isArray(game.players) &&
@@ -66,7 +64,6 @@ export default function MatchHistory({ userId }) {
     return () => unsubscribe();
   }, [userId]);
 
-  // 2. On mount, get all reported game IDs by this user
   useEffect(() => {
     async function fetchReportedGameIds() {
       if (!userId) return;
@@ -85,7 +82,6 @@ export default function MatchHistory({ userId }) {
     fetchReportedGameIds();
   }, [userId]);
 
-  // 3. When a report is submitted, write to Firestore & update local set
   const handleReport = async (reportData) => {
     if (!modalGame) return;
     try {
@@ -98,7 +94,6 @@ export default function MatchHistory({ userId }) {
         gameType: modalGame.type || "Unknown",
         timestamp: serverTimestamp(),
       });
-      // Update state so the tick appears immediately
       setReportedGameIds((prev) => new Set([...Array.from(prev), modalGame.id]));
       setModalGame(null);
       alert("Report submitted successfully.");

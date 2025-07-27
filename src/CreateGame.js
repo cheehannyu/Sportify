@@ -12,7 +12,6 @@ function CreateGame({ onCreate, onCancel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validation
     if (!telegramId.trim()) {
       setError('Telegram ID is required.');
       return;
@@ -102,7 +101,7 @@ function CreateGame({ onCreate, onCancel }) {
           value={time}
           onChange={e => setTime(e.target.value)}
           required
-          step="3600" // restricted to eg 1900hrs
+          step="3600" 
         />
       </div>
 

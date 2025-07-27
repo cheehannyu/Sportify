@@ -63,7 +63,6 @@ function Homepage({ username, userId, onLogout }) {
         </div>
       </div>
 
-      {/* Bottom-right toggle button for showing/hiding Match History */}
       <button
         className="history-button"
         aria-label="Toggle Match History"
@@ -72,7 +71,6 @@ function Homepage({ username, userId, onLogout }) {
         📖
       </button>
 
-      {/* Match History Sidebar */}
       {showHistory && (
         <aside className="history-sidebar">
           <div className="history-header">

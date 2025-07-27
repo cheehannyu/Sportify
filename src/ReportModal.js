@@ -5,7 +5,6 @@ export default function ReportModal({ isOpen, onClose, onSubmit, modalGame, user
   const [reportedUserId, setReportedUserId] = useState("");
   const [reason, setReason] = useState("");
 
-  // Reset form values each time modal opens
   useEffect(() => {
     if (isOpen) {
       setReportedUserId("");
@@ -21,7 +20,6 @@ export default function ReportModal({ isOpen, onClose, onSubmit, modalGame, user
       return;
     }
 
-    // Build report object including required fields
     const report = {
       reportedUserId: reportedUserId.trim(),
       reporterUserId: userId,

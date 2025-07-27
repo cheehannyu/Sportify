@@ -1,7 +1,6 @@
 .match-history-container {
   padding: 12px 8px 2px 2px;
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-  /* Make sure the list itself can scroll if needed: */
   height: 100%;
   overflow: auto;
 }
@@ -22,7 +21,7 @@
   padding: 16px 18px 12px 18px;
   position: relative;
   transition: box-shadow 0.15s;
-  word-break: break-all; /* Ensure IDs/wide texts wrap instead of overflowing */
+  word-break: break-all; 
 }
 
 .history-list-item:last-child {

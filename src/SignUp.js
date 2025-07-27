@@ -17,7 +17,6 @@ function SignUp({ onNavigate }) {
     setError(''); 
     setMessage(''); 
 
-    // Basic validation
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
