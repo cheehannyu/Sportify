@@ -162,12 +162,10 @@ function Boxing() {
     await deleteDoc(doc(db, "boxingGames", gameId));
   };
 
-  // Add game to conqueredGames and remove from boxingGames
   const handleConqueredGame = async (game) => {
   if (!window.confirm("Are you sure you've conquered this game?")) return;
 
   try {
-    // Pull the full boxing game document to get player info
     const gameRef = doc(db, "boxingGames", game.id);
     const gameSnap = await getDoc(gameRef);
 

@@ -162,12 +162,10 @@ function Squash() {
     await deleteDoc(doc(db, "squashGames", gameId));
   };
 
-  // Add game to conqueredGames and remove from squashGames
   const handleConqueredGame = async (game) => {
   if (!window.confirm("Are you sure you've conquered this game?")) return;
 
   try {
-    // Pull the full squash game document to get player info
     const gameRef = doc(db, "squashGames", game.id);
     const gameSnap = await getDoc(gameRef);
 

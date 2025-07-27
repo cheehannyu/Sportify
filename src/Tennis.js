@@ -162,12 +162,10 @@ function Tennis() {
     await deleteDoc(doc(db, "tennisGames", gameId));
   };
 
-  // Add game to conqueredGames and remove from tennisGames
   const handleConqueredGame = async (game) => {
   if (!window.confirm("Are you sure you've conquered this game?")) return;
 
   try {
-    // Pull the full tennis game document to get player info
     const gameRef = doc(db, "tennisGames", game.id);
     const gameSnap = await getDoc(gameRef);
 
